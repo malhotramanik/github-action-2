@@ -1,5 +1,4 @@
 name: Print First Commit Date on PR
-run-name: Print First Commit Date on PR
 
 on:
   pull_request:
@@ -12,8 +11,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Install GitHub CLI
+        run: |
+          sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+          sudo apt-add-repository https://cli.github.com/packages
+          sudo apt update
+          sudo apt install gh -y
+
       - name: Get first commit date
         id: first_commit_date
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Get the PR number
           PR_NUMBER=$(jq --raw-output .number "$GITHUB_EVENT_PATH")
@@ -29,7 +37,6 @@ jobs:
           
           echo "First commit date: $FIRST_COMMIT_DATE"
           echo "::set-output name=date::$FIRST_COMMIT_DATE"
-          
       
       - name: Print first commit date
         run: |
