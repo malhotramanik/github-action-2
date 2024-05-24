@@ -19,13 +19,13 @@ jobs:
       run: |
         first_commit=$(git rev-list --reverse HEAD | head -n 1)
         first_commit_date=$(git show -s --format=%ci $first_commit)
-        echo "First commit: $first_commit_date"
+        echo "First commit date: $first_commit_date"
         echo "::set-output name=date::$first_commit_date"
 
     - name: Calculate age
       id: calculate_age
       run: |
-        first_commit_date=${{ steps.first_commit_date.outputs.date }}
+        first_commit_date="${{ steps.first_commit_date.outputs.date }}"
         current_date=$(date -u +"%Y-%m-%d %H:%M:%S")
         first_commit_seconds=$(date -d "$first_commit_date" +%s)
         current_seconds=$(date -d "$current_date" +%s)
