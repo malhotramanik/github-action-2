@@ -1,0 +1,35 @@
+name: Print First Commit Date on PR
+run-name: Print First Commit Date on PR
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  print-first-commit-date:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Get first commit date
+        id: first_commit_date
+        run: |
+          # Get the PR number
+          PR_NUMBER=$(jq --raw-output .number "$GITHUB_EVENT_PATH")
+          
+          # Fetch the list of commits in the PR
+          COMMITS=$(gh api repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/commits)
+          
+          # Get the SHA of the first commit
+          FIRST_COMMIT_SHA=$(echo "$COMMITS" | jq --raw-output '.[0].sha')
+          
+          # Get the date of the first commit
+          FIRST_COMMIT_DATE=$(gh api repos/$GITHUB_REPOSITORY/commits/$FIRST_COMMIT_SHA | jq --raw-output '.commit.author.date')
+          
+          echo "First commit date: $FIRST_COMMIT_DATE"
+          echo "::set-output name=date::$FIRST_COMMIT_DATE"
+      
+      - name: Print first commit date
+        run: |
+          echo "The date of the first commit in this PR is: ${{ steps.first_commit_date.outputs.date }}"
