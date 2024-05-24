@@ -29,6 +29,7 @@ jobs:
           
           echo "First commit date: $FIRST_COMMIT_DATE"
           echo "::set-output name=date::$FIRST_COMMIT_DATE"
+          
       
       - name: Print first commit date
         run: |
