@@ -11,8 +11,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Get first commit date
-        id: first_commit_date
+      - name: Get PR details
+        id: pr_details
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -27,10 +27,21 @@ jobs:
           
           # Get the date of the first commit
           FIRST_COMMIT_DATE=$(gh api repos/$GITHUB_REPOSITORY/commits/$FIRST_COMMIT_SHA | jq --raw-output '.commit.author.date')
+
+          # Check if the PR is merged
+          PR_MERGED=$(jq --raw-output .pull_request.merged "$GITHUB_EVENT_PATH")
+          if [ "$PR_MERGED" = "true" ]; then
+            MERGE_DATE=$(jq --raw-output .pull_request.merged_at "$GITHUB_EVENT_PATH")
+          else
+            MERGE_DATE="Not merged"
+          fi
           
           echo "First commit date: $FIRST_COMMIT_DATE"
-          echo "::set-output name=date::$FIRST_COMMIT_DATE"
+          echo "::set-output name=first_commit_date::$FIRST_COMMIT_DATE"
+          echo "Merge date: $MERGE_DATE"
+          echo "::set-output name=merge_date::$MERGE_DATE"
       
-      - name: Print first commit date
+      - name: Print commit dates
         run: |
-          echo "The date of the first commit in this PR is: ${{ steps.first_commit_date.outputs.date }}"
+          echo "The date of the first commit in this PR is: ${{ steps.pr_details.outputs.first_commit_date }}"
+          echo "The date of the merge (if applicable) is: ${{ steps.pr_details.outputs.merge_date }}"
