@@ -32,7 +32,7 @@ jobs:
         current_date=$(date -u +"%Y-%m-%d %H:%M:%S")
         first_commit_seconds=$(date -d "$first_commit_date" +%s)
         current_seconds=$(date -d "$current_date" +%s)
-        age=$(( (current_seconds - first_commit_seconds) / 86400 )+1)
+        age=$(( ((current_seconds - first_commit_seconds) / 86400 )+1))
         echo "First commit age: $age days"
         echo "::set-output name=age::$age"
 
