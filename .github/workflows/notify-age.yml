@@ -36,6 +36,7 @@ jobs:
           # Get the first commit in the PR by comparing with the base commit
           first_commit=$(git rev-list $base_commit..HEAD | tail -n 1)
           first_commit_date=$(git show -s --format=%ci $first_commit)
+          echo "First commit: $first_commit"
           echo "First commit in PR: $first_commit_date"
           echo "::set-output name=date::$first_commit_date"
 
@@ -53,4 +54,4 @@ jobs:
       - name: Print age
         run: |
           echo "The first commit in this PR is ${{ steps.calculate_age.outputs.age }} days old"
-          
+        
