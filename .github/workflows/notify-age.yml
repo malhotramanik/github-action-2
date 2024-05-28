@@ -54,4 +54,3 @@ jobs:
       - name: Print age
         run: |
           echo "The first commit in this PR is ${{ steps.calculate_age.outputs.age }} days old"
-        
