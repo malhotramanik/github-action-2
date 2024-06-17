@@ -25,8 +25,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.merge_commit_sha }}
-          fetch-depth: 0  # Fetch all history for the merged branch
+          ref: ${{ github.event.pull_request.head.ref }}
+          fetch-depth: 0  # Fetch all history for the PR branch
 
       - name: Get first commit in PR
         id: first_commit_date
