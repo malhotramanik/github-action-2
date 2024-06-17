@@ -1,5 +1,5 @@
 name: Notify Merge On Master
-run-name: Notify Merge On Master
+run-name: Age OLD
 
 on:
   pull_request:

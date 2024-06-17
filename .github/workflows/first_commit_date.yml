@@ -1,5 +1,5 @@
 name: Print First Commit Date on PR
-
+run-name: 1st commit
 on:
   pull_request:
     types: [opened, synchronize, reopened]
