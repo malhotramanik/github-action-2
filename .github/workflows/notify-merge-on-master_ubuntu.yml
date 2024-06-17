@@ -1,0 +1,89 @@
+name: Notify Merge On Master
+run-name: Notify Merge On Master
+
+on:
+  pull_request:
+    types:
+      - closed
+
+    branches:
+      - master
+      - main
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  create-tagged-release:
+    name: Notify PR Merge On Master
+    runs-on: ubuntu-latest
+
+    if: github.event.pull_request.merged == true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0  # Fetch all history for the merged branch
+
+      - name: Get first commit in PR
+        id: first_commit_date
+        run: |
+          # Get the base commit of the PR
+          base_commit=$(jq -r '.pull_request.base.sha' < $GITHUB_EVENT_PATH)
+          # Get the first commit in the PR by comparing with the base commit
+          first_commit=$(git rev-list $base_commit..HEAD | tail -n 1)
+          first_commit_date=$(git show -s --format=%ci $first_commit)
+          echo "First commit in PR: $first_commit_date"
+          echo "::set-output name=date::$first_commit_date"
+
+      - name: Calculate age
+        id: calculate_age
+        run: |
+          first_commit_date="${{ steps.first_commit_date.outputs.date }}"
+          current_date=$(date -u +"%Y-%m-%d %H:%M:%S")
+          first_commit_seconds=$(date -d "$first_commit_date" +%s)
+          current_seconds=$(date -d "$current_date" +%s)
+          age=$(( ((current_seconds - first_commit_seconds) / 86400 )+1))
+          echo "First commit age: $age days"
+          echo "::set-output name=age::$age"
+
+      - name: Print age
+        run: |
+          echo "The first commit in this PR is ${{ steps.calculate_age.outputs.age }} days old"
+
+      - name: notify pr merge on master on slack
+        uses: slackapi/slack-github-action@v1.25.0
+        with:
+          channel-id: "C03JFA9RLTF"
+          payload: |
+            {
+            	"blocks": [
+            		{
+            			"type": "header",
+            			"text": {
+            				"type": "plain_text",
+            				"text": "PnM PR Merged to master :white_check_mark:",
+            				"emoji": true
+            			}
+            		},
+            		{
+            			"type": "section",
+            			"text": {
+            				"type": "mrkdwn",
+            				"text": "*PR*: <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}> | *C2D*: ${{ steps.calculate_age.outputs.age }} days"
+            			}
+            		},
+            		{
+            			"type": "section",
+            			"text": {
+            				"type": "mrkdwn",
+            				"text": "PR Owner: <${{ github.server_url }}/${{github.event.pull_request.user.login}}|${{github.event.pull_request.user.login}}> | Merged By: <${{ github.server_url }}/${{github.triggering_actor}}|${{github.triggering_actor}}>"
+            			}
+            		}
+            	]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
