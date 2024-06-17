@@ -38,6 +38,7 @@ jobs:
           # Get the first commit in the PR
           first_commit=$(echo "$commits" | jq -r '.[0].sha')
           first_commit_date=$(echo "$commits" | jq -r '.[0].commit.author.date')
+          echo "First commit hash: $first_commit_date"
           echo "First commit in PR: $first_commit_date"
           echo "::set-output name=date::$first_commit_date"
         env:
