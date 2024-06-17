@@ -25,7 +25,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
           fetch-depth: 0  # Fetch all history for the PR branch
 
       - name: Get first commit in PR
@@ -58,3 +57,4 @@ jobs:
       - name: Print age
         run: |
           echo "The first commit in this PR is ${{ steps.calculate_age.outputs.age }} days old"
+
