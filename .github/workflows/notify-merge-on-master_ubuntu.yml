@@ -25,8 +25,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0  # Fetch all history for the PR branch
+          ref: ${{ github.event.pull_request.merge_commit_sha }}
+          fetch-depth: 0  # Fetch all history for the merged branch
 
       - name: Get first commit in PR
         id: first_commit_date
@@ -53,37 +53,3 @@ jobs:
       - name: Print age
         run: |
           echo "The first commit in this PR is ${{ steps.calculate_age.outputs.age }} days old"
-
-      - name: notify pr merge on master on slack
-        uses: slackapi/slack-github-action@v1.25.0
-        with:
-          channel-id: "C03JFA9RLTF"
-          payload: |
-            {
-            	"blocks": [
-            		{
-            			"type": "header",
-            			"text": {
-            				"type": "plain_text",
-            				"text": "PnM PR Merged to master :white_check_mark:",
-            				"emoji": true
-            			}
-            		},
-            		{
-            			"type": "section",
-            			"text": {
-            				"type": "mrkdwn",
-            				"text": "*PR*: <${{ github.event.pull_request.html_url }}|${{ github.event.pull_request.title }}> | *C2D*: ${{ steps.calculate_age.outputs.age }} days"
-            			}
-            		},
-            		{
-            			"type": "section",
-            			"text": {
-            				"type": "mrkdwn",
-            				"text": "PR Owner: <${{ github.server_url }}/${{github.event.pull_request.user.login}}|${{github.event.pull_request.user.login}}> | Merged By: <${{ github.server_url }}/${{github.triggering_actor}}|${{github.triggering_actor}}>"
-            			}
-            		}
-            	]
-            }
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
