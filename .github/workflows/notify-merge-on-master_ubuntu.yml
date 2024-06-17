@@ -31,13 +31,18 @@ jobs:
       - name: Get first commit in PR
         id: first_commit_date
         run: |
-          # Get the base commit of the PR
-          base_commit=$(jq -r '.pull_request.base.sha' < $GITHUB_EVENT_PATH)
-          # Get the first commit in the PR by comparing with the base commit
-          first_commit=$(git rev-list $base_commit..HEAD | tail -n 1)
-          first_commit_date=$(git show -s --format=%ci $first_commit)
+          # Get the PR number
+          pr_number=${{ github.event.pull_request.number }}
+          # Use GitHub API to fetch the commits from the PR
+          commits=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            "https://api.github.com/repos/${{ github.repository }}/pulls/$pr_number/commits")
+          # Get the first commit in the PR
+          first_commit=$(echo "$commits" | jq -r '.[0].sha')
+          first_commit_date=$(echo "$commits" | jq -r '.[0].commit.author.date')
           echo "First commit in PR: $first_commit_date"
           echo "::set-output name=date::$first_commit_date"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Calculate age
         id: calculate_age
@@ -53,4 +58,3 @@ jobs:
       - name: Print age
         run: |
           echo "The first commit in this PR is ${{ steps.calculate_age.outputs.age }} days old"
-
