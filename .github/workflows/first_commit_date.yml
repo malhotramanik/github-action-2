@@ -1,5 +1,4 @@
 name: Print First Commit Date on PR
-run-name: Print First Commit Date on PR
 
 on:
   pull_request:
@@ -14,6 +13,8 @@ jobs:
 
       - name: Get first commit date
         id: first_commit_date
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # Get the PR number
           PR_NUMBER=$(jq --raw-output .number "$GITHUB_EVENT_PATH")
