@@ -26,7 +26,6 @@ jobs:
         uses: actions/checkout@v3
         with:
           ref: ${{ github.event.pull_request.head.ref }}
-          fetch-depth: 0  # Fetch all history for the PR branch
 
       - name: Get first commit in PR
         id: first_commit_date
